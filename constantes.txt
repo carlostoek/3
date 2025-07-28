@@ -1,0 +1,33 @@
+# Carpetas creadas
+- app/
+- app/core/
+- app/models/
+- app/handlers/
+- app/middlewares/
+- app/services/
+- app/utils/
+- migrations/
+- tests/
+- docs/
+
+# Archivos creados
+- main.py
+- requirements.txt
+- .env.example
+- constantes.txt
+
+# Variables definidas
+- BOT_TOKEN
+- DATABASE_URL
+- ADMIN_USER_IDS
+- VIP_CHANNEL_ID
+- FREE_CHANNEL_ID
+
+# Modelos creados
+- User
+
+# Funciones creadas
+- register_user
+- get_user_profile
+- start_handler
+- profile_handler

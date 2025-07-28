@@ -1,2 +1,188 @@
-Genera el código necesario  de la estructura básica de un bot de Telegram, desarrolla únicamente el código del bot en python y Aiogram 3,  no desarrolles ningún archivo relacionado con el despliegue, no generes run.sh ni ningún otro archivo relacionado a ello. Únicamente el código para ejecutar un bot en Telegram. 
-Debe de responder al comando /start con un saludo. Es lo único que hará por ahora
+Estás desarrollando un bot de Telegram  en fases para administración de canales, apégate de las instrucciones
+
+# Estructura de Proyecto: FASE 1
+raíz 
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── database.py
+│   │   └── bot.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── user.py
+│   ├── handlers/
+│   │   ├── __init__.py
+│   │   ├── basic.py
+│   ├── middlewares/
+│   │   ├── __init__.py
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── user_service.py
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── decorators.py
+│   │   ├── helpers.py
+│   │   └── validators.py
+├── migrations/
+├── tests/
+├── docs/
+├── requirements.txt
+├── .env.example
+├── constantes.txt
+└── main.py
+
+
+# Archivo: app/core/config.py
+class Settings:
+    BOT_TOKEN: str = "YOUR_BOT_TOKEN"
+    DATABASE_URL: str = "sqlite+aiosqlite:///./bot_db.sqlite3"
+    ADMIN_USER_IDS: list[int] = [123456789]
+    VIP_CHANNEL_ID: int = -1001234567890
+    FREE_CHANNEL_ID: int = -1001234567891
+
+
+# Archivo: app/core/database.py
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker, declarative_base
+
+DATABASE_URL = Settings().DATABASE_URL
+engine = create_async_engine(DATABASE_URL, echo=True)
+SessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+Base = declarative_base()
+
+
+# Archivo: app/core/bot.py
+from aiogram import Bot, Dispatcher
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from .config import Settings
+
+bot = Bot(token=Settings().BOT_TOKEN)
+storage = MemoryStorage()
+dp = Dispatcher(bot, storage=storage)
+
+
+# Archivo: app/models/user.py
+from sqlalchemy import Column, BigInteger, String, Boolean, Integer, DateTime
+from datetime import datetime
+from app.core.database import Base
+
+class User(Base):
+    __tablename__ = 'users'
+
+    user_id = Column(BigInteger, primary_key=True)
+    username = Column(String(50))
+    first_name = Column(String(100))
+    is_vip = Column(Boolean, default=False)
+    level = Column(Integer, default=1)
+    points = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    last_activity = Column(DateTime, default=datetime.utcnow)
+
+
+# Archivo: app/handlers/basic.py
+from aiogram import types
+from app.services.user_service import register_user, get_user_profile
+from app.core.bot import dp
+
+@dp.message_handler(commands=['start'])
+async def start_handler(message: types.Message):
+    await register_user(message.from_user.id, message.from_user.username, message.from_user.first_name)
+    await message.answer("¡Bienvenido al bot narrativo!")
+
+@dp.message_handler(commands=['perfil'])
+async def profile_handler(message: types.Message):
+    user_data = await get_user_profile(message.from_user.id)
+    await message.answer(f"Nivel: {user_data['level']}\nPuntos: {user_data['points']}")
+
+
+# Archivo: app/services/user_service.py
+from app.models.user import User
+from app.core.database import SessionLocal
+from sqlalchemy.future import select
+
+async def register_user(user_id: int, username: str, first_name: str):
+    async with SessionLocal() as session:
+        result = await session.execute(select(User).where(User.user_id == user_id))
+        user = result.scalar_one_or_none()
+        if not user:
+            new_user = User(user_id=user_id, username=username, first_name=first_name)
+            session.add(new_user)
+            await session.commit()
+
+async def get_user_profile(user_id: int) -> dict:
+    async with SessionLocal() as session:
+        result = await session.execute(select(User).where(User.user_id == user_id))
+        user = result.scalar_one()
+        return {"level": user.level, "points": user.points}
+
+
+# Archivo: app/utils/decorators.py
+# (Vacío por ahora)
+
+
+# Archivo: app/utils/helpers.py
+# (Vacío por ahora)
+
+
+# Archivo: app/utils/validators.py
+# (Vacío por ahora)
+
+
+# Archivo: .env.example
+BOT_TOKEN=your_bot_token_here
+DATABASE_URL=sqlite+aiosqlite:///./bot_db.sqlite3
+ADMIN_USER_IDS=123456789
+VIP_CHANNEL_ID=-1001234567890
+FREE_CHANNEL_ID=-1001234567891
+
+
+# Archivo: main.py
+from aiogram import executor
+from app.core.bot import dp
+import app.handlers.basic
+
+if __name__ == '__main__':
+    from app.core.database import engine, Base
+
+    async def on_startup(dispatcher):
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
+    executor.start_polling(dp, on_startup=on_startup)
+
+
+# Archivo: constantes.txt
+
+# Carpetas creadas
+- app/
+- app/core/
+- app/models/
+- app/handlers/
+- app/middlewares/
+- app/services/
+- app/utils/
+- migrations/
+- tests/
+- docs/
+
+# Archivos creados
+- main.py
+- requirements.txt
+- .env.example
+- constantes.txt
+
+# Variables definidas
+- BOT_TOKEN
+- DATABASE_URL
+- ADMIN_USER_IDS
+- VIP_CHANNEL_ID
+- FREE_CHANNEL_ID
+
+# Modelos creados
+- User
+
+# Funciones creadas
+- register_user
+- get_user_profile
+- start_handler
+- profile_handler

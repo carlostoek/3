@@ -1,0 +1,30 @@
+raíz
+│   ├── app/
+│   │   ├── core/
+│   │   │   ├── __init__.py
+│   │   │   ├── config.py
+│   │   │   ├── database.py
+│   │   │   └── bot.py
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── user.py
+│   │   ├── handlers/
+│   │   │   ├── __init__.py
+│   │   │   ├── basic.py
+│   │   ├── middlewares/
+│   │   │   ├── __init__.py
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   ├── user_service.py
+│   │   ├── utils/
+│   │   │   ├── __init__.py
+│   │   │   ├── decorators.py
+│   │   │   ├── helpers.py
+│   │   │   └── validators.py
+├── migrations/
+├── tests/
+├── docs/
+├── requirements.txt
+├── .env.example
+├── constantes.txt
+└── main.py
