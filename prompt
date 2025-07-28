@@ -1,0 +1,2 @@
+Genera el código necesario  de la estructura básica de un bot de Telegram, desarrolla únicamente el código del bot en python y Aiogram 3,  no desarrolles ningún archivo relacionado con el despliegue, no generes run.sh ni ningún otro archivo relacionado a ello. Únicamente el código para ejecutar un bot en Telegram. 
+Debe de responder al comando /start con un saludo. Es lo único que hará por ahora
